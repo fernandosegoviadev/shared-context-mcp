@@ -60,6 +60,13 @@ Required scope: `repo` for classic tokens, or `contents: read` for fine-grained 
 
 ### Claude Code
 
+Claude Code stores MCP server configuration differently depending on the platform:
+
+- **macOS / Linux**: per-project via `.claude/settings.json`, or global via `~/.claude/settings.json`
+- **Windows**: configuration must be registered via the CLI — `settings.json` is not read for MCPs on Windows
+
+#### macOS / Linux — via settings.json
+
 Per-project (`.claude/settings.json` inside each repo):
 ```json
 {
@@ -89,19 +96,81 @@ Global (`~/.claude/settings.json`) — applies to all your projects:
         "GITHUB_TOKEN": "ghp_xxxxxxxxxxxxxxxxxxxx",
         "CONTEXT_PROJECT_NAME": "MyProject"
       }
-    },
-    "otherproject-context": {
-      "command": "node",
-      "args": ["/Users/you/tools/shared-context-mcp/src/index.js"],
-      "env": {
-        "CONTEXT_REPO_URL": "https://github.com/your-org/otherproject-shared-context.git",
-        "GITHUB_TOKEN": "ghp_xxxxxxxxxxxxxxxxxxxx",
-        "CONTEXT_PROJECT_NAME": "OtherProject"
-      }
     }
   }
 }
 ```
+
+#### Windows — via CLI
+
+On Windows, Claude Code reads MCP configuration from `%USERPROFILE%\.claude.json` (per project),
+which must be registered using the `claude mcp add` command. **Editing `settings.json` manually has no effect on Windows.**
+
+Run this from the root of your project (the directory you open with Claude Code):
+
+```powershell
+cd D:\your-projects\myproject
+
+claude mcp add myproject-context "C:\path\to\node.exe" "C:\path\to\shared-context-mcp\src\index.js" `
+  --env CONTEXT_REPO_URL=https://github.com/your-org/myproject-shared-context.git `
+  --env GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx `
+  --env CONTEXT_PROJECT_NAME=MyProject
+```
+
+> **Important:** run the command from the project directory you intend to use with Claude Code.
+> The entry is registered under that specific project path in `%USERPROFILE%\.claude.json`.
+> Running it from a different folder will register the MCP under the wrong project.
+
+To verify the server is connected, open Claude Code and run `/mcp`. You should see:
+
+```
+task-solver-context · ✔ connected · 4 tools
+```
+
+To remove a server:
+
+```powershell
+claude mcp remove myproject-context
+```
+
+#### Connecting multiple repositories of the same project (Windows)
+
+A common setup is having one shared context repo that feeds several sub-projects (API, frontend, mobile app, etc.). Since Claude Code registers MCPs per project folder, you run `claude mcp add` once for each repo, all pointing to the same MCP server and the same context repo.
+
+Suppose your project is structured like this:
+
+```
+D:\Projects\MyApp\
+├── mcp\shared-context-mcp\     ← the MCP server (this repo)
+├── api\myapp-api\              ← backend
+├── app\myapp-app\              ← mobile app
+└── web\myapp-web\              ← frontend
+```
+
+And you have a single shared context repo at `https://github.com/your-org/myapp-shared-context.git`.
+
+Run the following in PowerShell to register the MCP in all three projects at once:
+
+```powershell
+cd "D:\Projects\MyApp\api\myapp-api"
+claude mcp add myapp-context "C:\path\to\node.exe" "D:\Projects\MyApp\mcp\shared-context-mcp\src\index.js" --env CONTEXT_REPO_URL=https://github.com/your-org/myapp-shared-context.git --env GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx --env CONTEXT_PROJECT_NAME=MyApp
+
+cd "D:\Projects\MyApp\app\myapp-app"
+claude mcp add myapp-context "C:\path\to\node.exe" "D:\Projects\MyApp\mcp\shared-context-mcp\src\index.js" --env CONTEXT_REPO_URL=https://github.com/your-org/myapp-shared-context.git --env GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx --env CONTEXT_PROJECT_NAME=MyApp
+
+cd "D:\Projects\MyApp\web\myapp-web"
+claude mcp add myapp-context "C:\path\to\node.exe" "D:\Projects\MyApp\mcp\shared-context-mcp\src\index.js" --env CONTEXT_REPO_URL=https://github.com/your-org/myapp-shared-context.git --env GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx --env CONTEXT_PROJECT_NAME=MyApp
+```
+
+All three point to the same MCP binary and the same context repo. The local clone is shared too — the server clones the repo once to `~/.shared-context/myapp` and all projects read from that same directory.
+
+After running the commands, open each project folder in Claude Code and verify with `/mcp`:
+
+```
+myapp-context · ✔ connected · 4 tools
+```
+
+---
 
 ### Cursor
 
