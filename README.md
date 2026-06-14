@@ -59,12 +59,12 @@ Per-project (`.claude/settings.json` inside each repo):
 ```json
 {
   "mcpServers": {
-    "tasksolver-context": {
+    "myproject-context": {
       "command": "node",
       "args": ["/Users/you/tools/shared-context-mcp/src/index.js"],
       "env": {
-        "CONTEXT_REPO_URL": "git@github.com:your-org/tasksolver-shared-context.git",
-        "CONTEXT_PROJECT_NAME": "TaskSolver"
+        "CONTEXT_REPO_URL": "git@github.com:your-org/myproject-shared-context.git",
+        "CONTEXT_PROJECT_NAME": "MyProject"
       }
     }
   }
@@ -75,12 +75,12 @@ Global (`~/.claude/settings.json`) — applies to all your projects:
 ```json
 {
   "mcpServers": {
-    "tasksolver-context": {
+    "myproject-context": {
       "command": "node",
       "args": ["/Users/you/tools/shared-context-mcp/src/index.js"],
       "env": {
-        "CONTEXT_REPO_URL": "git@github.com:your-org/tasksolver-shared-context.git",
-        "CONTEXT_PROJECT_NAME": "TaskSolver"
+        "CONTEXT_REPO_URL": "git@github.com:your-org/myproject-shared-context.git",
+        "CONTEXT_PROJECT_NAME": "MyProject"
       }
     },
     "otherproject-context": {
@@ -101,12 +101,12 @@ Global (`~/.claude/settings.json`) — applies to all your projects:
 ```json
 {
   "mcpServers": {
-    "tasksolver-context": {
+    "myproject-context": {
       "command": "node",
       "args": ["/Users/you/tools/shared-context-mcp/src/index.js"],
       "env": {
-        "CONTEXT_REPO_URL": "git@github.com:your-org/tasksolver-shared-context.git",
-        "CONTEXT_PROJECT_NAME": "TaskSolver"
+        "CONTEXT_REPO_URL": "git@github.com:your-org/myproject-shared-context.git",
+        "CONTEXT_PROJECT_NAME": "MyProject"
       }
     }
   }
@@ -119,12 +119,12 @@ Global (`~/.claude/settings.json`) — applies to all your projects:
 ```json
 {
   "mcpServers": {
-    "tasksolver-context": {
+    "myproject-context": {
       "command": "node",
       "args": ["/Users/you/tools/shared-context-mcp/src/index.js"],
       "env": {
-        "CONTEXT_REPO_URL": "git@github.com:your-org/tasksolver-shared-context.git",
-        "CONTEXT_PROJECT_NAME": "TaskSolver"
+        "CONTEXT_REPO_URL": "git@github.com:your-org/myproject-shared-context.git",
+        "CONTEXT_PROJECT_NAME": "MyProject"
       }
     }
   }
