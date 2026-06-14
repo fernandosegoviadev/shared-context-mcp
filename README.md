@@ -167,3 +167,14 @@ my-project-shared-context/
 - Pass the token via `GITHUB_TOKEN` env var — never embed it directly in `CONTEXT_REPO_URL`.
 - The server prevents path traversal: it can only read files inside the cloned repo directory.
 - Allowed file extensions: `.md`, `.txt`, `.json`, `.yaml`, `.yml`.
+
+> **Important — do not commit MCP config files to git.**  
+> Files like `.claude/settings.json`, `.cursor/mcp.json`, and `~/.codeium/windsurf/mcp_config.json` may contain `GITHUB_TOKEN` and other credentials. Add them to your `.gitignore` to prevent accidental exposure:
+>
+> ```gitignore
+> # MCP server config (may contain secrets)
+> .claude/settings.json
+> .cursor/mcp.json
+> ```
+>
+> For global config files stored under your home directory (`~/.claude/settings.json`, `~/.cursor/mcp.json`, `~/.codeium/windsurf/mcp_config.json`), make sure those directories are not inside any tracked repository.
