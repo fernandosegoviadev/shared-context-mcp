@@ -9,9 +9,10 @@
  * Compatible with: Claude Code, Cursor, Windsurf, and any MCP client.
  *
  * Required env vars:
- *   CONTEXT_REPO_URL      Git URL of the private context repo
+ *   CONTEXT_REPO_URL      HTTPS Git URL of the context repo (public or private)
  *
  * Optional env vars:
+ *   GITHUB_TOKEN          PAT with repo read scope — required for private repos
  *   CONTEXT_PROJECT_NAME  Display name shown in tool responses (default: "Shared")
  *   CONTEXT_REPO_PATH     Local path where the repo is cloned (default: ~/.shared-context/<project-slug>)
  *   CONTEXT_BRANCH        Branch to track (default: "main")
@@ -52,15 +53,29 @@ if (!CONFIG.repoUrl) {
   process.exit(1);
 }
 
+// ─── Auth ─────────────────────────────────────────────────────────────────────
+
+function buildAuthenticatedUrl(url) {
+  const token = process.env.GITHUB_TOKEN;
+  if (token && url.startsWith("https://") && !url.includes("@")) {
+    return url.replace("https://", `https://${token}@`);
+  }
+  return url;
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 async function ensureRepoExists() {
+  const authUrl = buildAuthenticatedUrl(CONFIG.repoUrl);
   if (!existsSync(CONFIG.localPath)) {
     await fs.mkdir(CONFIG.localPath, { recursive: true });
     const git = simpleGit();
-    await git.clone(CONFIG.repoUrl, CONFIG.localPath, ["--branch", CONFIG.branch]);
+    await git.clone(authUrl, CONFIG.localPath, ["--branch", CONFIG.branch]);
     return { cloned: true };
   }
+  // Keep remote URL in sync (handles token rotation and first run on existing clones)
+  const git = simpleGit(CONFIG.localPath);
+  await git.remote(["set-url", "origin", authUrl]);
   return { cloned: false };
 }
 
@@ -278,6 +293,7 @@ server.tool(
       if (!existsSync(CONFIG.localPath)) return notDownloaded();
 
       const git = simpleGit(CONFIG.localPath);
+      await git.remote(["set-url", "origin", buildAuthenticatedUrl(CONFIG.repoUrl)]);
       await git.fetch("origin", CONFIG.branch);
 
       const localLog = await getGitLog(git, 1);
