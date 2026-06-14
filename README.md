@@ -32,22 +32,27 @@ npm install
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `CONTEXT_REPO_URL` | ✅ yes | — | Git URL of the private context repo |
+| `CONTEXT_REPO_URL` | ✅ yes | — | HTTPS URL of the context repo (public or private) |
+| `GITHUB_TOKEN` | private repos | — | PAT with `repo` (or `contents:read`) scope |
 | `CONTEXT_PROJECT_NAME` | no | `"Shared"` | Display name shown in tool responses |
 | `CONTEXT_REPO_PATH` | no | `~/.shared-context/<project-slug>` | Local path where the repo is cloned |
 | `CONTEXT_BRANCH` | no | `main` | Branch to track |
 
-### Authentication
+### Authentication for private repos
 
-For private repos, use SSH (recommended if your machine has keys set up):
-```
-CONTEXT_REPO_URL=git@github.com:YOUR_ORG/my-context.git
+Set `GITHUB_TOKEN` alongside `CONTEXT_REPO_URL`. The server injects the token into the HTTPS URL automatically — you never embed credentials in the URL itself.
+
+```json
+"env": {
+  "CONTEXT_REPO_URL": "https://github.com/YOUR_ORG/my-context.git",
+  "GITHUB_TOKEN": "ghp_xxxxxxxxxxxxxxxxxxxx"
+}
 ```
 
-Or HTTPS with a token:
-```
-CONTEXT_REPO_URL=https://YOUR_TOKEN@github.com/YOUR_ORG/my-context.git
-```
+Generate a token at **GitHub → Settings → Developer settings → Personal access tokens**.  
+Required scope: `repo` for classic tokens, or `contents: read` for fine-grained tokens.
+
+> Public repos work without any token — just set `CONTEXT_REPO_URL` and omit `GITHUB_TOKEN`.
 
 ---
 
@@ -63,7 +68,8 @@ Per-project (`.claude/settings.json` inside each repo):
       "command": "node",
       "args": ["/Users/you/tools/shared-context-mcp/src/index.js"],
       "env": {
-        "CONTEXT_REPO_URL": "git@github.com:your-org/myproject-shared-context.git",
+        "CONTEXT_REPO_URL": "https://github.com/your-org/myproject-shared-context.git",
+        "GITHUB_TOKEN": "ghp_xxxxxxxxxxxxxxxxxxxx",
         "CONTEXT_PROJECT_NAME": "MyProject"
       }
     }
@@ -79,7 +85,8 @@ Global (`~/.claude/settings.json`) — applies to all your projects:
       "command": "node",
       "args": ["/Users/you/tools/shared-context-mcp/src/index.js"],
       "env": {
-        "CONTEXT_REPO_URL": "git@github.com:your-org/myproject-shared-context.git",
+        "CONTEXT_REPO_URL": "https://github.com/your-org/myproject-shared-context.git",
+        "GITHUB_TOKEN": "ghp_xxxxxxxxxxxxxxxxxxxx",
         "CONTEXT_PROJECT_NAME": "MyProject"
       }
     },
@@ -87,7 +94,8 @@ Global (`~/.claude/settings.json`) — applies to all your projects:
       "command": "node",
       "args": ["/Users/you/tools/shared-context-mcp/src/index.js"],
       "env": {
-        "CONTEXT_REPO_URL": "git@github.com:your-org/otherproject-shared-context.git",
+        "CONTEXT_REPO_URL": "https://github.com/your-org/otherproject-shared-context.git",
+        "GITHUB_TOKEN": "ghp_xxxxxxxxxxxxxxxxxxxx",
         "CONTEXT_PROJECT_NAME": "OtherProject"
       }
     }
@@ -105,7 +113,8 @@ Global (`~/.claude/settings.json`) — applies to all your projects:
       "command": "node",
       "args": ["/Users/you/tools/shared-context-mcp/src/index.js"],
       "env": {
-        "CONTEXT_REPO_URL": "git@github.com:your-org/myproject-shared-context.git",
+        "CONTEXT_REPO_URL": "https://github.com/your-org/myproject-shared-context.git",
+        "GITHUB_TOKEN": "ghp_xxxxxxxxxxxxxxxxxxxx",
         "CONTEXT_PROJECT_NAME": "MyProject"
       }
     }
@@ -123,7 +132,8 @@ Global (`~/.claude/settings.json`) — applies to all your projects:
       "command": "node",
       "args": ["/Users/you/tools/shared-context-mcp/src/index.js"],
       "env": {
-        "CONTEXT_REPO_URL": "git@github.com:your-org/myproject-shared-context.git",
+        "CONTEXT_REPO_URL": "https://github.com/your-org/myproject-shared-context.git",
+        "GITHUB_TOKEN": "ghp_xxxxxxxxxxxxxxxxxxxx",
         "CONTEXT_PROJECT_NAME": "MyProject"
       }
     }
@@ -154,6 +164,6 @@ my-project-shared-context/
 ## Security
 
 - Keep the context repo **private** on GitHub.
-- Never hardcode GitHub tokens in the config — use env vars or SSH keys.
+- Pass the token via `GITHUB_TOKEN` env var — never embed it directly in `CONTEXT_REPO_URL`.
 - The server prevents path traversal: it can only read files inside the cloned repo directory.
 - Allowed file extensions: `.md`, `.txt`, `.json`, `.yaml`, `.yml`.
