@@ -24,6 +24,7 @@ import simpleGit from "simple-git";
 import fs from "fs/promises";
 import path from "path";
 import { existsSync } from "fs";
+import { homedir } from "os";
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
@@ -38,7 +39,7 @@ const CONFIG = {
   branch: process.env.CONTEXT_BRANCH || "main",
   localPath:
     process.env.CONTEXT_REPO_PATH ||
-    path.join(process.env.HOME, ".shared-context", projectSlug),
+    path.join(homedir(), ".shared-context", projectSlug),
   allowedExtensions: [".md", ".txt", ".json", ".yaml", ".yml"],
 };
 
